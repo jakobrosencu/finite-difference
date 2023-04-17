@@ -6,8 +6,6 @@
 #include <string>
 #include <vector>
 #include "math.h"
-#include <omp.h>  
-#include <mpi.h>  
 #include <stdio.h>
 #include <chrono>
 #include <ctime>

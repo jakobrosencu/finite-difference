@@ -1,4 +1,4 @@
-COMPILER := mpicxx
+COMPILER := gcc
 
 # -----------------------------------------------------
 # Make main
