@@ -64,7 +64,7 @@ void Jacobi(VDD &A, VD &temp, VD b, int nTemp) {
         // ----------------------------------------------
 
         if (converged == 1) {
-            cout << "Jacobi/GS converged in " << iter << " iterations" << endl;
+            cout << "Jacobi converged in " << iter << " iterations" << endl;
             return;
         }
 
@@ -81,11 +81,6 @@ void GaussSeidel(VDD &A, VD &temp, VD b, int nTemp) {
     double cur_delta = 0.;
     double max_delta = 0.;
     double tol = 1.e-04;
-
-    VD tempNew;
-    tempNew.resize(temp.size());
-
-    rLOOP tempNew[r] = 0.;
 
     // ====================================================
     // Begin Iterations
@@ -117,7 +112,7 @@ void GaussSeidel(VDD &A, VD &temp, VD b, int nTemp) {
 
             newval = 0;
             cLOOP if (r != c) newval += A[r][c] * temp[c];
-            newval /= A[r][r];
+            newval = (b[r] - newval) / A[r][r];
 
             // Convergence check
 
@@ -136,7 +131,7 @@ void GaussSeidel(VDD &A, VD &temp, VD b, int nTemp) {
         // ----------------------------------------------
 
         if (converged == 1) {
-            cout << "Jacobi/GS converged in " << iter << " iterations" << endl;
+            cout << "GS converged in " << iter << " iterations" << endl;
             return;
         }
 
