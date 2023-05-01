@@ -1,3 +1,60 @@
+//  ==
+//  ||
+//  ||
+//  || C O N J U G A T E   G R A D I E N T   R O U T I N E S
+//  ||
+//  ||
+//  ==
+
+//  ==
+//  ||
+//  || Utility routine: Dot
+//  ||
+//  ==
+
+double Dot(VD &vec1, VD &vec2, int nTemp) {
+    double sum = 0.;
+    rowLOOP
+    sum += vec1[row] * vec2[row];
+    return sum;
+}
+
+
+//  ==
+//  ||
+//  || Utility routine: MatVecProd
+//  ||
+//  || Computes the matrix-vector product, prod = A*p.
+//  ||
+//  ==
+
+void MatVecProd(VDD &A, VD &p, VD &prod, int nTemp) {
+    rowLOOP
+    {
+        prod[row] = 0.;
+        colLOOP
+        prod[row] += A[row][col] * p[col];
+    }
+}
+
+
+//  ==
+//  ||
+//  || Utility routine: Residual
+//  ||
+//  || Computes the residual, residual = b - A*temp
+//  ||
+//  ==
+
+void Residual(VD &residual, VD &temp, VDD &A, VD &b, int nTemp) {
+
+    MatVecProd(A, temp, residual, nTemp);
+
+    rowLOOP residual[row] = b[row] - residual[row];
+
+}
+
+
 
 void Jacobi(VDD &A, VD &temp, VD b, int nTemp) {
     int converged;
@@ -45,19 +102,31 @@ void Jacobi(VDD &A, VD &temp, VD b, int nTemp) {
             cLOOP if (r != c) newval -= A[r][c] * temp[c];
             newval /= A[r][r];
 
-            // Convergence check
+            // Record new value in solution
+
+            tempNew[r] = newval;
+
+            // Convergence test #1
 
             cur_delta = fabs(temp[r] - newval);
 
             if (cur_delta > tol) converged = 0;
 
-            // Record new value in solution
-
-            tempNew[r] = newval;
+            rLOOP temp[r] = tempNew[r];
 
         }
 
-        rLOOP temp[r] = tempNew[r];
+        // Convergence test #2
+
+        VD res;
+        res.resize(nTemp + 1);
+        Residual(res, temp, A, b, nTemp);
+        double r_dot_r = Dot(res, res, nTemp);
+
+        if (fabs(r_dot_r) < 1.e-10)
+            converged = 1;
+        else
+            converged = 0;
 
         // ----------------------------------------------
         // (5) Gather convergence information from PEs
@@ -126,6 +195,18 @@ void GaussSeidel(VDD &A, VD &temp, VD b, int nTemp) {
 
         }
 
+        // Convergence test #2
+
+        VD res;
+        res.resize(nTemp + 1);
+        Residual(res, temp, A, b, nTemp);
+        double r_dot_r = Dot(res, res, nTemp);
+
+        if (fabs(r_dot_r) < 1.e-10)
+            converged = 1;
+        else
+            converged = 0;
+
         // ----------------------------------------------
         // (5) Gather convergence information from PEs
         // ----------------------------------------------
@@ -139,63 +220,6 @@ void GaussSeidel(VDD &A, VD &temp, VD b, int nTemp) {
 }
 
 
-
-
-//  ==
-//  ||
-//  ||
-//  || C O N J U G A T E   G R A D I E N T   R O U T I N E S
-//  ||
-//  ||
-//  ==
-
-//  ==
-//  ||
-//  || Utility routine: Dot
-//  ||
-//  ==
-
-double Dot(VD &vec1, VD &vec2, int nTemp) {
-    double sum = 0.;
-    rowLOOP
-    sum += vec1[row] * vec2[row];
-    return sum;
-}
-
-
-//  ==
-//  ||
-//  || Utility routine: MatVecProd
-//  ||
-//  || Computes the matrix-vector product, prod = A*p.
-//  ||
-//  ==
-
-void MatVecProd(VDD &A, VD &p, VD &prod, int nTemp) {
-    rowLOOP
-    {
-        prod[row] = 0.;
-        colLOOP
-        prod[row] += A[row][col] * p[col];
-    }
-}
-
-
-//  ==
-//  ||
-//  || Utility routine: Residual
-//  ||
-//  || Computes the residual, residual = b - A*temp
-//  ||
-//  ==
-
-void Residual(VD &residual, VD &temp, VDD &A, VD &b, int nTemp) {
-
-    MatVecProd(A, temp, residual, nTemp);
-
-    rowLOOP residual[row] = b[row] - residual[row];
-
-}
 
 
 
