@@ -112,9 +112,9 @@ void Jacobi(VDD &A, VD &temp, VD b, int nTemp) {
 
             if (cur_delta > tol) converged = 0;
 
-            rLOOP temp[r] = tempNew[r];
-
         }
+
+        rLOOP temp[r] = tempNew[r];
 
         // Convergence test #2
 
